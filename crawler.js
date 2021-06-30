@@ -53,7 +53,7 @@ class Crawler extends EventEmitter {
 
                   this.generateEvents('data', { currentUrl, result, total_size });
                 }).catch((error) => {
-                  this.generateEvents('error', { currentUrl, error });
+                  this.generateEvents('error', { currentUrl, error, total_size });
                 });
             } else if (/30\d/.test(headers.statusCode)) {
               const { location } = headers.headers;
@@ -65,12 +65,12 @@ class Crawler extends EventEmitter {
                 this.crawl(nextUrl, countOfRedirects + 1);
               }
 
-              this.generateEvents('data', { currentUrl, result: headers });
+              this.generateEvents('data', { currentUrl, result: headers, total_size });
             } else {
-              this.generateEvents('data', { currentUrl, result: headers });
+              this.generateEvents('data', { currentUrl, result: headers, total_size });
             }
           }).catch((error) => {
-            this.generateEvents('error', { currentUrl, error });
+            this.generateEvents('error', { currentUrl, error, total_size: 0 });
           });
       } else {
         this.waitingOfConnection += 1;
@@ -260,13 +260,13 @@ class Crawler extends EventEmitter {
     return hrefs;
   }
 
-  generateEvents(eventsType, data) {
+  generateEvents(eventsType, data, size) {
     this.countOfProcessedUrls += 1;
 
     if (eventsType === 'data') {
-      this.emit('data', { url: data.currentUrl, result: data.result });
+      this.emit('data', { url: data.currentUrl, result: data.result, size });
     } else if (eventsType === 'error') {
-      this.emit('error', new Error(`Error in ${data.currentUrl}: ${data.error}`));
+      this.emit('error', { error: new Error(`Error in ${data.currentUrl}: ${data.error}`), size});
     }
 
     if (this.waitingOfConnection === 0 && this.countOfProcessedUrls === this.foundLinks.size) this.emit('end');
