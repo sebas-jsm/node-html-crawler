@@ -44,12 +44,14 @@ class Crawler extends EventEmitter {
 
         this.getDataByUrl(currentUrl)
           .then((headers) => {
+            let total_size = headers.data_size;
             if (headers.statusCode === 200 && /^text\/html/.test(headers.headers['content-type'])) {
               this.getDataByUrl(currentUrl, 'GET')
                 .then((result) => {
+                  total_size += result.data_size;
                   result.links.forEach((link) => { if (link.url) this.crawl(link.url); });
 
-                  this.generateEvents('data', { currentUrl, result });
+                  this.generateEvents('data', { currentUrl, result, total_size });
                 }).catch((error) => {
                   this.generateEvents('error', { currentUrl, error });
                 });
