@@ -51,9 +51,9 @@ class Crawler extends EventEmitter {
                   total_size += result.data_size;
                   result.links.forEach((link) => { if (link.url) this.crawl(link.url); });
 
-                  this.generateEvents('data', { currentUrl, result, total_size });
+                  this.generateEvents('data', { currentUrl, result }, total_size);
                 }).catch((error) => {
-                  this.generateEvents('error', { currentUrl, error, total_size });
+                  this.generateEvents('error', { currentUrl, error }, total_size);
                 });
             } else if (/30\d/.test(headers.statusCode)) {
               const { location } = headers.headers;
@@ -65,12 +65,12 @@ class Crawler extends EventEmitter {
                 this.crawl(nextUrl, countOfRedirects + 1);
               }
 
-              this.generateEvents('data', { currentUrl, result: headers, total_size });
+              this.generateEvents('data', { currentUrl, result: headers }, total_size);
             } else {
-              this.generateEvents('data', { currentUrl, result: headers, total_size });
+              this.generateEvents('data', { currentUrl, result: headers }, total_size);
             }
           }).catch((error) => {
-            this.generateEvents('error', { currentUrl, error, total_size: 0 });
+            this.generateEvents('error', { currentUrl, error }, 0);
           });
       } else {
         this.waitingOfConnection += 1;
