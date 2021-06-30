@@ -186,9 +186,10 @@ class Crawler extends EventEmitter {
     return new Promise((resolve, reject) => {
       const request = reqModule.request(options, (response) => {
         let body = '';
-
+        let data_size = 0;
+        
         response.setEncoding('utf8');
-        response.on('data', (chunk) => { body += chunk; });
+        response.on('data', (chunk) => { body += chunk; data_size += chunk.length; });
         response.on('end', () => {
           this.countOfConnections -= 1;
 
@@ -196,6 +197,7 @@ class Crawler extends EventEmitter {
             requestMethod: method,
             statusCode: response.statusCode,
             headers: response.headers,
+            data_size,
             body,
             links: (response.statusCode === 200 && /^text\/html/.test(response.headers['content-type'])) ? this.getUrlsOnHtml(urlString, body) : [],
           });
