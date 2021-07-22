@@ -125,7 +125,7 @@ class Crawler extends EventEmitter {
       result = true;
     }
 
-    if (result && !this.config.urlFilter(urlString)) {
+    if (result && !this.config.urlFilter(urlObject)) {
       result = false;
     }
 
